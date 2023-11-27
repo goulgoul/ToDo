@@ -4,11 +4,16 @@ uint32_t timer_activite_en_cours = 0;
 
 void commencer_activite() 
 {
-  while(!PAUSE || !FIN_ACVITITE)
+  while(!FIN_ACVITITE)
   {
+    if (PAUSE)
+    {
+      while(!FIN_PAUSE);
+    }
     timer_activite_en_cours++;
     delay(1000);
   }
+  
 }
 
 void cycle_activites()

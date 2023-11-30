@@ -1,5 +1,6 @@
 #include "defines.hpp"
 #include "fonctions.hpp"
+uint8_t pins_fin_activite[] = {4, 5, 6};
 
 typedef enum
 {
@@ -18,6 +19,7 @@ uint32_t timer_activite = 0;
 void setup() 
 {
   Serial.begin(BAUD_RATE);
+  pinMode(BOUTON_JAUGE, INPUT_PULLDOWN)
 }
 
 void loop() 
@@ -35,7 +37,7 @@ void loop()
 
       while (!digitalRead(BOUTON_JAUGE))
       {
-        clignoter_jauge(BLANC);
+        // clignoter_jauge(BLANC);
       }
       etat_actuel = ACTIVITE_EN_COURS;
       break;
@@ -63,7 +65,7 @@ void loop()
       // FAIRE CLIGNOTER LA JAUGE
       while(!digitalRead(BOUTON_JAUGE))
       {
-        clignoter_jauge(ORANGE);
+        // clignoter_jauge(ORANGE);
       }
       etat_actuel = ACTIVITE_EN_COURS;
       
@@ -91,4 +93,5 @@ void loop()
 
       break;
   }
+  delay(1000);
 }

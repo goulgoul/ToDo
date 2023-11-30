@@ -1,17 +1,10 @@
+#include <stdint.h>
 #define BAUD_RATE 9600
+#define NOMBRE_ACTIVITES 3
+#define PIN_FIN_ACTIVITE_1 3
+#define BOUTON_JAUGE 2
 
-#define PIN_JAUGE_BOUTON 12
-#define DEBUT_ACTIVITE digitalRead(PIN_JAUGE_BOUTON) == LOW
+#define BLANC 64, 64, 64
+#define ORANGE 64, 32, 0
 
-#define PIN_FIN_ACTIVITE_1 2
-#define PIN_FIN_ACTIVITE_2
-#define PIN_FIN_ACTIVITE_3
-#define PIN_FIN_ACTIVITE_4
-#define PIN_FIN_ACTIVITE_5
-#define PIN_FIN_ACTIVITE_6
-#define PIN_FIN_ACTIVITE_7
-#define PIN_FIN_ACTIVITE_8
-#define PIN_FIN_ACTIVITE_9
-#define PIN_FIN_ACTIVITE_10
-#define PIN_FIN_ACTIVITE_11
-#define PIN_FIN_ACTIVITE_12
+uint8_t pins_fin_activite[] = {4, 5, 6};

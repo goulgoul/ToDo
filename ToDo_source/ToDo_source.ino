@@ -14,12 +14,12 @@ typedef enum {
 etats_possibles_t etat_actuel = DEBUT_JOURNEE;
 uint8_t numero_activite = 1;
 uint32_t timer_activite = 0;
-bool INTERRUPTION_ACTIVITE_TERMINEE = false;
+bool SIGNAL_ACTIVITE_TERMINEE = false;
 
 
 void isr_fin_activite_1()
 {
-  INTERRUPTION_ACTIVITE_TERMINEE = true;
+  SIGNAL_ACTIVITE_TERMINEE = true;
 }
 
 
@@ -42,26 +42,47 @@ void loop()
       break;
 
     case ACTIVITE_EN_ATTENTE:
-      Serial.println("Activité en attente");
+      Serial.println("Activité n° " + String(numero_activite) + " en attente");
       while (!digitalRead(BOUTON_JAUGE));
+      timer_activite = 0;
       etat_actuel = ACTIVITE_EN_COURS;
       break;
   
     case ACTIVITE_EN_COURS:
-      Serial.println("Début de l'activité");
-      while (!digitalRead(BOUTON_JAUGE) && !INTERRUPTION_ACTIVITE_TERMINEE)
+      Serial.println("Activité n° " + String(numero_activite) + " en cours");
+      delay(1000);
+      while (!SIGNAL_ACTIVITE_TERMINEE)
       {
+        if (digitalRead(BOUTON_JAUGE))
+        {
+          etat_actuel = ACTIVITE_EN_PAUSE;
+          break;
+        }
         timer_activite++;
         delay(10);
       }
+      
+      if (etat_actuel == ACTIVITE_EN_PAUSE)
+      {
+        break;
+      }
+
       timer_activite /= 100;
       Serial.println("Timer activité n° " + String(numero_activite) + " : " + String(timer_activite) + " secondes.");
       etat_actuel = ACTIVITE_TERMINEE;
+      break;
+
+    case ACTIVITE_EN_PAUSE:
+      Serial.println("Activité n° " + String(numero_activite) + " en pause");
+      delay(1000);
+      while(!digitalRead(BOUTON_JAUGE));
+      etat_actuel = ACTIVITE_EN_COURS;
       break;
   
     case ACTIVITE_TERMINEE:
         numero_activite >= NOMBRE_ACTIVITES ? etat_actuel = JOURNEE_TERMINEE : etat_actuel = ACTIVITE_EN_ATTENTE;
         numero_activite++;
+        SIGNAL_ACTIVITE_TERMINEE = false;
         break;
     
     case JOURNEE_TERMINEE:

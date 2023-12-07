@@ -1,6 +1,7 @@
 #include "defines.hpp"
 #include "fonctions.hpp"
-uint8_t pins_fin_activite[] = { 4, 5, 6 };
+#include <Adafruit_NeoPixel.h>
+// uint8_t pins_fin_activite[] = { 4, 5, 6 };
 
 typedef enum {
   DEBUT_JOURNEE,
@@ -16,6 +17,10 @@ etats_possibles_t etat_actuel = DEBUT_JOURNEE;
 bool SIGNAL_ACTIVITE_TERMINEE = false;
 uint8_t numero_activite = 0;
 uint32_t timer_activite = 0;
+
+
+Adafruit_NeoPixel jauge(NOMBRE_LEDS_JAUGE, PIN_JAUGE_LED, NEO_RGB + NEO_KHZ800);
+
 
 void isr_fin_activite_1()
 {
@@ -52,7 +57,10 @@ void loop()
     case ACTIVITE_EN_ATTENTE:
       numero_activite++;
       Serial.println("Activité n° " + String(numero_activite) + " en attente");
-      while (!digitalRead(BOUTON_JAUGE));
+      while (!digitalRead(BOUTON_JAUGE))
+      {
+        clignoter_jauge(jauge, VIOLET);
+      }
       timer_activite = 0;
       etat_actuel = ACTIVITE_EN_COURS;
       break;

@@ -19,8 +19,7 @@ uint8_t numero_activite = 0;
 uint32_t timer_activite = 0;
 
 
-Adafruit_NeoPixel jauge(NOMBRE_LEDS_JAUGE, PIN_JAUGE_LED, NEO_RGB + NEO_KHZ800);
-
+Adafruit_NeoPixel jauge(NOMBRE_LEDS_JAUGE, PIN_JAUGE_LED, NEO_GRB + NEO_KHZ800);
 
 void isr_fin_activite_1()
 {
@@ -38,8 +37,9 @@ void setup()
   Serial.begin(BAUD_RATE);
   delay(1000);
   pinMode(BOUTON_JAUGE, INPUT_PULLDOWN);
+  jauge.setBrightness(10);
  
-  attachInterrupt(digitalPinToInterrupt(PIN_FIN_ACTIVITE_1), isr_fin_activite_1, CHANGE);
+  attachInterrupt(digitalPinToInterrupt(PIN_FIN_ACTIVITE_1), isr_fin_activite_1, FALLING);
   Serial.println("Init done");
 }
 
@@ -50,6 +50,7 @@ void loop()
     case DEBUT_JOURNEE:
       Serial.println("Debut journée");
       etat_actuel = ACTIVITE_EN_ATTENTE;
+      SIGNAL_ACTIVITE_TERMINEE = false;
       numero_activite = 0;
       timer_activite = 0;
       break;
@@ -59,7 +60,7 @@ void loop()
       Serial.println("Activité n° " + String(numero_activite) + " en attente");
       while (!digitalRead(BOUTON_JAUGE))
       {
-        clignoter_jauge(jauge, VIOLET);
+        clignoter_jauge(jauge, BLEU);
       }
       timer_activite = 0;
       etat_actuel = ACTIVITE_EN_COURS;
@@ -93,7 +94,10 @@ void loop()
     case ACTIVITE_EN_PAUSE:
       Serial.println("Activité n° " + String(numero_activite) + " en pause");
       delay(1000);
-      while(!digitalRead(BOUTON_JAUGE));
+      while(!digitalRead(BOUTON_JAUGE))
+      {
+        clignoter_jauge(jauge, VIOLET);
+      }
       etat_actuel = ACTIVITE_EN_COURS;
       break;
   

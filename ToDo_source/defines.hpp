@@ -10,5 +10,6 @@
 #define NOMBRE_LEDS_JAUGE 18
 // Adafruit_NeoPixel pixels(NOMBRE_LEDS, PIN_JAUGE_LEDS, NEO_RGB + NEO_KHZ800);
 
-#define BLANC jauge.Color(64, 64, 64)
-#define VIOLET jauge.Color(61, 40, 84)
+#define BLANC 0xFFFFFF
+#define VIOLET 0xD02080
+#define BLEU 0x3030FF

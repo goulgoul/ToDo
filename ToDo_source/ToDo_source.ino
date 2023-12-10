@@ -1,7 +1,9 @@
 #include "defines.hpp"
 #include "fonctions.hpp"
 #include <Adafruit_NeoPixel.h>
+
 // uint8_t pins_fin_activite[] = { 4, 5, 6 };
+UART RFID_1(digitalPinToPinName(4), digitalPinToPinName(5), NC, NC);
 
 typedef enum {
   DEBUT_JOURNEE,
@@ -35,6 +37,7 @@ void isr_fin_activite_1()
 void setup() 
 {
   Serial.begin(BAUD_RATE);
+
   delay(1000);
   pinMode(BOUTON_JAUGE, INPUT_PULLDOWN);
   jauge.setBrightness(10);
@@ -45,6 +48,7 @@ void setup()
 
 void loop() 
 {
+  
   switch (etat_actuel) 
   {
     case DEBUT_JOURNEE:

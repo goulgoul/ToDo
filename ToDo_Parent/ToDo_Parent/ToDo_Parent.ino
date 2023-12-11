@@ -4,9 +4,9 @@
 #define NOMBRE_LEDS_EMOTIONS 15
 #define LUMINOSITE 30
 #define PIN_LEDS_EMOTIONS 12
-#define BOUTON_ROUGE 11
-#define BOUTON_JAUNE 10
-#define BOUTON_VERT 9
+#define BOUTON_ROUGE 2
+#define BOUTON_JAUNE 3
+#define BOUTON_VERT 4
 
 typedef enum {
   ATTENDRE,

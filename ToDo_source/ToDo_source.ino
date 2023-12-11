@@ -2,8 +2,8 @@
 #include "fonctions.hpp"
 #include <Adafruit_NeoPixel.h>
 
-// uint8_t pins_fin_activite[] = { 4, 5, 6 };
-UART RFID_1(digitalPinToPinName(4), digitalPinToPinName(5), NC, NC);
+uint8_t pins_fin_activite[] = { 4, 5, 6 };
+// UART RFID_1(digitalPinToPinName(4), digitalPinToPinName(5), NC, NC);
 
 typedef enum {
   DEBUT_JOURNEE,
@@ -23,7 +23,7 @@ uint32_t timer_activite = 0;
 
 Adafruit_NeoPixel jauge(NOMBRE_LEDS_JAUGE, PIN_JAUGE_LED, NEO_GRB + NEO_KHZ800);
 
-void isr_fin_activite_1()
+void isr_fin_activite()
 {
   if (etat_actuel != ACTIVITE_EN_COURS)
   {
@@ -37,18 +37,16 @@ void isr_fin_activite_1()
 void setup() 
 {
   Serial.begin(BAUD_RATE);
-
+  jauge.begin();
   delay(1000);
   pinMode(BOUTON_JAUGE, INPUT_PULLDOWN);
   jauge.setBrightness(10);
  
-  attachInterrupt(digitalPinToInterrupt(PIN_FIN_ACTIVITE_1), isr_fin_activite_1, FALLING);
   Serial.println("Init done");
 }
 
 void loop() 
-{
-  
+{  
   switch (etat_actuel) 
   {
     case DEBUT_JOURNEE:
@@ -61,6 +59,8 @@ void loop()
 
     case ACTIVITE_EN_ATTENTE:
       numero_activite++;
+      attachInterrupt(digitalPinToInterrupt(pins_fin_activite[numero_activite - 1]), isr_fin_activite, RISING);
+
       Serial.println("Activité n° " + String(numero_activite) + " en attente");
       while (!digitalRead(BOUTON_JAUGE))
       {
@@ -106,9 +106,10 @@ void loop()
       break;
   
     case ACTIVITE_TERMINEE:
-        numero_activite >= NOMBRE_ACTIVITES ? etat_actuel = JOURNEE_TERMINEE : etat_actuel = ACTIVITE_EN_ATTENTE;
-        SIGNAL_ACTIVITE_TERMINEE = false;
-        break;
+      detachInterrupt(digitalPinToInterrupt(pins_fin_activite[numero_activite]));
+      numero_activite >= NOMBRE_ACTIVITES ? etat_actuel = JOURNEE_TERMINEE : etat_actuel = ACTIVITE_EN_ATTENTE;
+      SIGNAL_ACTIVITE_TERMINEE = false;
+      break;
     
     case JOURNEE_TERMINEE:
       Serial.println("Journée terminée");

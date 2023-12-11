@@ -11,5 +11,11 @@
 // Adafruit_NeoPixel pixels(NOMBRE_LEDS, PIN_JAUGE_LEDS, NEO_RGB + NEO_KHZ800);
 
 #define BLANC 0xFFFFFF
-#define VIOLET 0xD02080
-#define BLEU 0x3030FF
+#define VIOLET 0x614084
+#define BLEU 0x0000FF
+#define NOIR 0x000000
+#define ROUGE 0xFF0000
+#define VERT 0x00FF00
+#define JAUNE 0xFFFF00
+
+#define DUREE_PERIODE_SECONDES 4 * 60 * 3600

@@ -10,6 +10,13 @@
 #define NOMBRE_LEDS_JAUGE 18
 // Adafruit_NeoPixel pixels(NOMBRE_LEDS, PIN_JAUGE_LEDS, NEO_RGB + NEO_KHZ800);
 
+#define RST 9
+#define SS 10
+#define MOSI 11
+#define MISO 12
+#define SCK 13
+
+
 #define BLANC 0xFFFFFF
 #define VIOLET 0x614084
 #define BLEU 0x0000FF
@@ -19,3 +26,7 @@
 #define JAUNE 0xFFFF00
 
 #define DUREE_PERIODE_SECONDES 4 * 60 * 3600
+
+#define NUID_RFID "14725017413"
+
+

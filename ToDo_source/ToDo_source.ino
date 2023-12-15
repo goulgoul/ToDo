@@ -47,11 +47,23 @@ void printHex(byte *buffer, byte bufferSize) {
 }
 
 String lire_nuid_rfid() {
+  while (!rfid.PICC_IsNewCardPresent())
+    ;
+
+  // Verify if the NUID has been readed
+  while (!rfid.PICC_ReadCardSerial())
+    ;
+
   String nuid = "";
-  for (int i = 0; i < rfid.uid.size; i++)
-  {
+  for (int i = 0; i < rfid.uid.size; i++) {
     nuid += String(rfid.uid.uidByte[i]);
   }
+  // Halt PICC
+  rfid.PICC_HaltA();
+
+  // Stop encryption on PCD
+  rfid.PCD_StopCrypto1();
+
   return nuid;
 }
 
@@ -65,10 +77,6 @@ void setup() {
   for (byte i = 0; i < 6; i++) {
     key.keyByte[i] = 0xFF;
   }
-  delay(1000);
-  Serial.println(F("This code scan the MIFARE Classsic NUID."));
-  Serial.print(F("Using the following key:"));
-  printHex(key.keyByte, MFRC522::MF_KEY_SIZE);
 
 
   jauge.begin();
@@ -81,32 +89,8 @@ void setup() {
 
 void loop() {
   // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-  if (!rfid.PICC_IsNewCardPresent())
-    return;
-
-  // Verify if the NUID has been readed
-  if (!rfid.PICC_ReadCardSerial())
-    return;
-
-  if (lire_nuid_rfid() == NUID_RFID)
-  {
-    Serial.println("RFID TROUVÉ !");
-  }
-  
-
-  Serial.println(F("The NUID tag is:"));
-  Serial.print(F("In hex: "));
-  printHex(rfid.uid.uidByte, rfid.uid.size);
-  Serial.println();
 
 
-
-  // Halt PICC
-  rfid.PICC_HaltA();
-
-  // Stop encryption on PCD
-  rfid.PCD_StopCrypto1();
-  return;
 
   ////////////////////////////////
 
@@ -120,12 +104,16 @@ void loop() {
       break;
 
     case ACTIVITE_EN_ATTENTE:
+
       numero_activite++;
       attachInterrupt(digitalPinToInterrupt(pins_fin_activite[numero_activite - 1]), isr_fin_activite, RISING);
 
       Serial.println("Activité n° " + String(numero_activite) + " en attente");
       while (!digitalRead(BOUTON_JAUGE)) {
         clignoter_jauge(jauge, BLEU);
+      }
+      if (lire_nuid_rfid() == NUID_RFID) {
+        Serial.println("RFID TROUVÉ !");
       }
       timer_activite = 0;
       etat_actuel = ACTIVITE_EN_COURS;

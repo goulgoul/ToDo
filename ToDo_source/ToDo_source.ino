@@ -4,7 +4,7 @@
 #include <SPI.h>
 #include <MFRC522.h>
 
-uint8_t pins_fin_activite[] = { 4, 5, 6 };
+uint8_t pins_fin_activite[] = { 4, 5, 6, };
 // UART RFID_1(digitalPinToPinName(4), digitalPinToPinName(5), NC, NC);
 
 MFRC522 rfid(SS, RST);
@@ -26,6 +26,7 @@ etats_possibles_t etat_actuel = DEBUT_JOURNEE;
 bool SIGNAL_ACTIVITE_TERMINEE = false;
 uint8_t numero_activite = 0;
 uint32_t timer_activite = 0;
+uint32_t temps_par_activite[NOMBRE_ACTIVITES];
 
 
 Adafruit_NeoPixel jauge(NOMBRE_LEDS_JAUGE, PIN_JAUGE_LED, NEO_GRB + NEO_KHZ800);
@@ -39,12 +40,6 @@ void isr_fin_activite() {
 }
 
 
-void printHex(byte *buffer, byte bufferSize) {
-  for (byte i = 0; i < bufferSize; i++) {
-    Serial.print(buffer[i] < 0x10 ? "0" : "");
-    Serial.print(buffer[i], HEX);
-  }
-}
 
 String lire_nuid_rfid() {
   while (!rfid.PICC_IsNewCardPresent())
@@ -70,6 +65,12 @@ String lire_nuid_rfid() {
 
 void setup() {
   Serial.begin(BAUD_RATE);
+  delay(1000);
+  Serial.println("Serial good:)");
+  pinMode(BOUTON_JAUGE, INPUT_PULLUP);
+  
+ 
+
   SPI.begin();
 
   rfid.PCD_Init();
@@ -81,19 +82,12 @@ void setup() {
 
   jauge.begin();
   delay(1000);
-  pinMode(BOUTON_JAUGE, INPUT_PULLDOWN);
   jauge.setBrightness(10);
-
+  delay(1000);
   Serial.println("Init done");
 }
 
 void loop() {
-  // Reset the loop if no new card present on the sensor/reader. This saves the entire process when idle.
-
-
-
-  ////////////////////////////////
-
   switch (etat_actuel) {
     case DEBUT_JOURNEE:
       Serial.println("Debut journée");
@@ -101,20 +95,20 @@ void loop() {
       SIGNAL_ACTIVITE_TERMINEE = false;
       numero_activite = 0;
       timer_activite = 0;
+
       break;
 
     case ACTIVITE_EN_ATTENTE:
-
+      attachInterrupt(digitalPinToInterrupt(pins_fin_activite[numero_activite]), isr_fin_activite, RISING);
+      pinMode(pins_fin_activite[numero_activite], INPUT_PULLDOWN);
       numero_activite++;
-      attachInterrupt(digitalPinToInterrupt(pins_fin_activite[numero_activite - 1]), isr_fin_activite, RISING);
-
       Serial.println("Activité n° " + String(numero_activite) + " en attente");
-      while (!digitalRead(BOUTON_JAUGE)) {
+      while (digitalRead(BOUTON_JAUGE)) {
         clignoter_jauge(jauge, BLEU);
       }
-      if (lire_nuid_rfid() == NUID_RFID) {
-        Serial.println("RFID TROUVÉ !");
-      }
+      // if (lire_nuid_rfid() == NUID_RFID) {
+      //   Serial.println("RFID TROUVÉ !");
+      // }
       timer_activite = 0;
       etat_actuel = ACTIVITE_EN_COURS;
       break;
@@ -123,7 +117,7 @@ void loop() {
       Serial.println("Activité n° " + String(numero_activite) + " en cours");
       delay(1000);
       while (!SIGNAL_ACTIVITE_TERMINEE) {
-        if (digitalRead(BOUTON_JAUGE)) {
+        if (!digitalRead(BOUTON_JAUGE)) {
           etat_actuel = ACTIVITE_EN_PAUSE;
           break;
         }
@@ -144,7 +138,7 @@ void loop() {
     case ACTIVITE_EN_PAUSE:
       Serial.println("Activité n° " + String(numero_activite) + " en pause");
       delay(1000);
-      while (!digitalRead(BOUTON_JAUGE)) {
+      while (digitalRead(BOUTON_JAUGE)) {
         clignoter_jauge(jauge, VIOLET);
       }
       etat_actuel = ACTIVITE_EN_COURS;
@@ -166,5 +160,7 @@ void loop() {
       etat_actuel = DEBUT_JOURNEE;
       break;
   }
-  delay(1000);
+  delay(10);
+
+
 }
